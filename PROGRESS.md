@@ -5,6 +5,15 @@ The plan itself is in [PLAN.md](PLAN.md).
 
 ---
 
+## 2026-10-16 — README
+
+### Changed
+- Added `README.md`: what the project is, local setup, scripts, teacher account commands,
+  project layout, the security rules worth knowing, the steps before the first deploy, and what
+  is still open. Written for the developer and the backup person named in PLAN.md.
+
+---
+
 ## 2026-10-16 — Open the parent page from the dashboard, and per-student preview
 
 ### Changed
@@ -293,7 +302,7 @@ finished, so it is **not yet verified** in the React version.
   first deploy. Not done — do not deploy or push until local testing is finished.
 - **Password reset** does not sign out devices already signed in (sessions end within 12 hours).
 - **Real phones:** three phones including an older Android, slow mobile data (Phase 4).
-- Nothing is committed yet.
+- First commit `f20d822` ("initial code changes") is pushed to `main` and `DEV-PORTAL-001` on GitHub (Fnyz/Parent-grade-portal). Checked: no secrets or build folders in it.
 
 ## Running it locally
 
