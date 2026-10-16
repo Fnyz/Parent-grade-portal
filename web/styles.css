@@ -1,0 +1,139 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+/* Fonts are bundled and served from this site; the content policy blocks other origins. */
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/figtree";
+
+/* Dark mode is a choice (Light, Dark or Auto), applied as a .dark class on <html>
+   by public/theme.js and web/lib/theme.ts. Light is the default. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* "School Notebook": cool paper, navy ink, blue for actions, marigold accent. */
+  color-scheme: light;
+  --radius: 0.875rem;
+  --background: #F3F5F9;
+  --foreground: #0F1B2D;
+  --card: #FFFFFF;
+  --card-foreground: #0F1B2D;
+  --popover: #FFFFFF;
+  --popover-foreground: #0F1B2D;
+  --primary: #2B59C3;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E6EAF1;
+  --secondary-foreground: #0F1B2D;
+  --muted: #EDF0F5;
+  --muted-foreground: #5B6576;
+  --accent: #E8EEFB;
+  --accent-foreground: #1E4296;
+  --destructive: #B4261A;
+  --border: #E2E6EE;
+  --input: #D5DBE6;
+  --ring: #2B59C3;
+  --ink: #0F1B2D;          /* the dark hero bands and teacher sidebar */
+  --ink-2: #24344F;
+  --ink-muted: #C9D2E3;
+  --marigold: #F5B83D;
+  --marigold-soft: #FDF1D6;
+  --success: #1D7A4E;
+  --success-soft: #E3F3EA;
+  --warning: #8A5300;
+  --warning-soft: #FDF1D6;
+  --fail: #B4261A;
+  --fail-soft: #FCE9E6;
+  --missing: #F0C66B;
+  --missing-soft: #FFFBF1;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #0B1424;
+  --foreground: #E8EDF5;
+  --card: #131F33;
+  --card-foreground: #E8EDF5;
+  --popover: #172540;
+  --popover-foreground: #E8EDF5;
+  --primary: #7FA2EE;
+  --primary-foreground: #0B1424;
+  --secondary: #1C2B45;
+  --secondary-foreground: #E8EDF5;
+  --muted: #1C2B45;
+  --muted-foreground: #A3AEC2;
+  --accent: #1D2F52;
+  --accent-foreground: #C9D8F8;
+  --destructive: #F0897E;
+  --border: #24344F;
+  --input: #2E4062;
+  --ring: #7FA2EE;
+  --ink: #060D19;
+  --ink-2: #1C2B45;
+  --ink-muted: #A9B4C8;
+  --marigold: #F5B83D;
+  --marigold-soft: #3A2C0E;
+  --success: #7FD3A4;
+  --success-soft: #12301F;
+  --warning: #F2C46A;
+  --warning-soft: #3A2C0E;
+  --fail: #F0897E;
+  --fail-soft: #3A1915;
+  --missing: #B38A2E;
+  --missing-soft: #2A2210;
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-fail: var(--fail);
+  --color-fail-soft: var(--fail-soft);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-muted: var(--ink-muted);
+  --color-marigold: var(--marigold);
+  --color-marigold-soft: var(--marigold-soft);
+  --color-missing: var(--missing);
+  --color-missing-soft: var(--missing-soft);
+  --font-sans: "Figtree Variable", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", "Figtree Variable", system-ui, sans-serif;
+}
+
+@layer base {
+  * { @apply border-border outline-ring/50; }
+  body { @apply bg-background text-foreground antialiased; }
+  input[type="number"] { -moz-appearance: textfield; }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+}
+
+/* Printing: report cards and access slips print on plain paper. */
+@media print {
+  body { background: #fff !important; color: #000 !important; }
+  .no-print { display: none !important; }
+  .print-plain { border: 0 !important; box-shadow: none !important; padding: 0 !important; background: none !important; }
+  body.printing-slips #root { display: none !important; }
+  body.printing-slips #slips { display: grid !important; }
+}
+#slips { display: none; grid-template-columns: 1fr 1fr; }

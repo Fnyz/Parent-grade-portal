@@ -1,0 +1,11 @@
+# Headers for the pages and their files. API responses set their own in src/http.ts.
+# no-store everywhere, so the Back button on a shared phone cannot bring back a
+# report card. No inline scripts, and nothing loads from other sites. Inline
+# styles are allowed because the dialog and toast components set them.
+/*
+  Cache-Control: no-store
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Strict-Transport-Security: max-age=31536000
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
