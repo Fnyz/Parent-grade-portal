@@ -5,6 +5,19 @@ The plan itself is in [PLAN.md](PLAN.md).
 
 ---
 
+## 2026-10-20 — Ignore the Serena cache (first change through a pull request)
+
+### Changed
+- `.gitignore`: added `.serena/`, the cache folder of the Serena coding tool, so it stops
+  showing in `git status` and can never be committed by accident.
+
+### Purpose
+- The first change made the recommended way: a branch from `main`, a pull request (CI runs),
+  then merge (Deploy runs: dev, smoke test, approval, production, smoke test).
+- The smoke test change before this (`2c8ab9b`) went straight to `main` without a pull request.
+
+---
+
 ## 2026-10-20 — Production live, and a smoke test after every deploy
 
 ### Done

@@ -7,3 +7,5 @@ backups/
 *.log
 .DS_Store
 dist/
+# Cache from the Serena coding tool, not part of the project
+.serena/
