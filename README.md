@@ -9,7 +9,8 @@ A small website where parents see their child's report cards, and advisers enter
   students by hand or from a spreadsheet, enter grades in a grid that saves on its own, and choose
   when each quarter becomes visible to parents.
 
-Everything runs on one free Cloudflare account: a Worker for the pages and API, KV for classes and
+Everything runs on one free Cloudflare account, at `grades.reportcard-ph.workers.dev`
+(dev: `grades-dev.reportcard-ph.workers.dev`): a Worker for the pages and API, KV for classes and
 grades, a Durable Object for sessions and access codes, and the Rate Limiting binding for wrong
 code guesses.
 
@@ -50,6 +51,8 @@ Safari may not keep the sign-in cookie on `http://localhost`.
 | `npm test` | API and unit tests, run inside the Workers runtime |
 | `npm run typecheck` | Type checks the Worker and the pages |
 | `npm run teacher -- …` | Teacher accounts (below) |
+
+Before pushing, `npm run typecheck && npm test && npm run build` runs the same checks as CI.
 
 ## Teacher accounts
 
@@ -106,25 +109,79 @@ These come from PLAN.md, "Rules that must hold", and the tests check most of the
 - Every response sends `Cache-Control: no-store` and a strict content policy. No inline scripts
   and no third-party scripts or fonts: fonts and SheetJS are bundled and served from this site.
 
-## Before the first deploy
+## Deploying
 
-Not done yet. See PLAN.md, Phase 1, and do not deploy real grades before Phase 0 approval.
+Deploys run from GitHub Actions:
 
-1. Create the KV namespaces and put their IDs in `wrangler.jsonc`:
-   ```bash
-   npx wrangler kv namespace create DATA
-   npx wrangler kv namespace create DATA --env dev
-   ```
-2. Set the parent token secret:
-   ```bash
-   npx wrangler secret put PARENT_SECRET
-   ```
-3. Build and deploy:
-   ```bash
-   npm run build
-   npx wrangler deploy
-   ```
-4. Create the first teacher with `npm run teacher -- create … --remote`.
+- **CI** (`.github/workflows/ci.yml`): every pull request and every push to a branch other than
+  `main` runs the type checks, tests and build. No secrets, deploys nothing.
+- **Deploy** (`.github/workflows/deploy.yml`): every push to `main` runs the same checks, deploys
+  to the **dev** Worker (`grades-dev`, fake data), then waits for your approval in
+  GitHub before deploying to **production** (real grades). You can also start it by hand from the
+  Actions tab.
+
+The pipeline never creates Cloudflare resources or sets secrets. Do these once, by hand:
+
+### 1. Cloudflare
+
+```bash
+npx wrangler login
+```
+
+In the Cloudflare dashboard, open **Workers & Pages** once and choose your free `workers.dev`
+subdomain if it asks.
+
+Create one KV namespace per environment and paste each `id` into `wrangler.jsonc`, replacing
+`REPLACE_WITH_PRODUCTION_KV_ID` and `REPLACE_WITH_DEV_KV_ID`:
+
+```bash
+npx wrangler kv namespace create DATA
+npx wrangler kv namespace create DATA --env dev
+```
+
+Set the parent token secret for each environment, a different long random string for each
+(`openssl rand -base64 48` makes one). Changing it later signs out every remembered phone.
+
+```bash
+npx wrangler secret put PARENT_SECRET
+npx wrangler secret put PARENT_SECRET --env dev
+```
+
+Create an API token for GitHub: **My Profile > API Tokens > Create Token**, template
+**Edit Cloudflare Workers**, limited to your account. Copy your **Account ID** from the
+Workers & Pages overview.
+
+### 2. GitHub
+
+In the repository's **Settings > Environments**:
+
+- Create `dev`.
+- Create `production`, tick **Required reviewers** and add yourself.
+- In both, add the secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Keeping them as
+  environment secrets means production's copy is only released after you approve.
+
+To check a deploy without publishing anything, build first, then dry-run (the build picks the
+environment, so `wrangler deploy` takes no `--env`):
+
+```bash
+CLOUDFLARE_ENV=dev npm run build && npx wrangler deploy --dry-run    # dev
+npm run build && npx wrangler deploy --dry-run                       # production
+```
+
+### 3. Deploy
+
+Commit the KV IDs in `wrangler.jsonc` and push to `main`. Watch the **Actions** tab: after the dev
+deploy, open the run and click **Review deployments > Approve** for production. Until the KV IDs
+are filled in, the deploy jobs stop with an error that says so.
+
+Then create the first teacher in each environment:
+
+```bash
+npm run teacher -- create --email you@school.ph --name "Your Name" --class "Grade 4 - Sampaguita" --remote --env dev
+npm run teacher -- create --email adviser@school.ph --name "..." --class "..." --remote
+```
+
+No real grades go into production before the school head's written approval (PLAN.md, Phase 0).
 
 ## Still open
 

@@ -1,0 +1,92 @@
+# CD: every push to main is checked, deployed to the dev Worker
+# (grades-dev, fake data), then waits for approval before it is
+# deployed to production (real grades).
+#
+# One-time setup in GitHub (Settings > Environments), see README "Deploying":
+#   - environment "dev"
+#   - environment "production" with yourself as a required reviewer
+#   - secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID
+# KV namespaces and PARENT_SECRET are created once by hand; this workflow
+# never creates resources or sets secrets.
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    uses: ./.github/workflows/ci.yml
+
+  dev:
+    name: Deploy to dev
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: dev
+    concurrency:
+      group: deploy-dev
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - name: Stop if the KV namespace IDs are still placeholders
+        run: |
+          if grep -q "REPLACE_WITH_" wrangler.jsonc; then
+            echo "::error file=wrangler.jsonc::Put the real KV namespace IDs in wrangler.jsonc first (README, Deploying)."
+            exit 1
+          fi
+      - run: npm ci
+      - name: Build for the dev environment
+        run: npm run build
+        env:
+          CLOUDFLARE_ENV: dev
+      - name: Deploy
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  production:
+    name: Deploy to production
+    needs: dev
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # The "production" environment's required reviewer must approve before this runs.
+    environment:
+      name: production
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - name: Stop if the KV namespace IDs are still placeholders
+        run: |
+          if grep -q "REPLACE_WITH_" wrangler.jsonc; then
+            echo "::error file=wrangler.jsonc::Put the real KV namespace IDs in wrangler.jsonc first (README, Deploying)."
+            exit 1
+          fi
+      - run: npm ci
+      - run: npm run build
+      - name: Deploy
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

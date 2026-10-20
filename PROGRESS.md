@@ -5,6 +5,69 @@ The plan itself is in [PLAN.md](PLAN.md).
 
 ---
 
+## 2026-10-20 — Cloudflare account, address and Worker names
+
+### Done
+- Cloudflare account created; `npx wrangler login` works (account ID `e429264ccc1a6c17935d561937bade77`).
+- `workers.dev` subdomain changed from `jezbusico` to **`reportcard-ph`** (free, account-wide).
+- Workers renamed in `wrangler.jsonc`: `parent-grade-portal` → **`grades`**, dev → **`grades-dev`**.
+  Addresses once deployed: `https://grades.reportcard-ph.workers.dev` and
+  `https://grades-dev.reportcard-ph.workers.dev`. Comments in `deploy.yml` and the README updated.
+- README: how to dry-run a deploy. With the Vite plugin you build first, then
+  `npx wrangler deploy --dry-run` with no `--env`; running it on the source config fails with
+  "assets ... missing the required directory property".
+
+### Verified
+- Dry runs: dev builds as `grades-dev` with the dev KV binding, production as `grades`.
+
+- Step 4 done: KV namespaces created (production `DATA` `55da82290c1945abb2604cf3f48e93ac`,
+  dev `dev-DATA` `95e04d2fbc6c4177966c264cd65eace6`) and their IDs are in `wrangler.jsonc`.
+  Wrangler reformatted the file when it added them (layout only). Removed the `"remote": true` it
+  put on the dev binding, so running the dev environment locally never touches the real dev
+  namespace. Dry runs and 65 tests pass.
+
+### Next
+- [x] Step 5: `PARENT_SECRET` set on `grades` and `grades-dev`, different values (checked with
+  `wrangler secret list`, names only). Setting it created both Workers, still empty until the first deploy.
+- [ ] Steps 6–7: account API token, GitHub environments and secrets
+- Note: names in older entries below (`parent-grade-portal`, `parent-grade-portal-dev`) are the old Worker names.
+
+---
+
+## 2026-10-20 — CI/CD with GitHub Actions
+
+Decision: the project will be deployed to Cloudflare.
+
+### Changed
+- `.github/workflows/ci.yml`: type check, tests and build on every pull request and on pushes to
+  branches other than `main`. No secrets.
+- `.github/workflows/deploy.yml`: on push to `main` (or started by hand): the same checks, then
+  deploy to **dev** (`parent-grade-portal-dev`), then wait for approval, then deploy to
+  **production**. Uses `npx wrangler deploy` with `CLOUDFLARE_API_TOKEN` and
+  `CLOUDFLARE_ACCOUNT_ID`; no third-party deploy action. Both deploy jobs stop with a clear error
+  while `wrangler.jsonc` still has the `REPLACE_WITH_` KV placeholders.
+- Actions pinned to commits: `actions/checkout` v7.0.1, `actions/setup-node` v7.1.0, Node 22.
+- README: "Before the first deploy" replaced by "Deploying" with the one-time setup.
+
+### Verified
+- `actionlint` 1.7.12: no problems in either workflow.
+- On a fresh clone: `npm ci`, type check, 65 tests (1 skipped) and build all pass.
+- Local dry runs: the production build deploys as `parent-grade-portal`, the dev build
+  (`CLOUDFLARE_ENV=dev`) as `parent-grade-portal-dev` with the dev KV namespace and the Durable
+  Object migration; `.dev.vars` is not among the uploaded files.
+- Not run on GitHub yet: nothing is committed or pushed.
+
+### Waiting on you (one-time setup, README "Deploying")
+- [ ] `npx wrangler login`; pick the `workers.dev` subdomain
+- [ ] Create both KV namespaces, put the IDs in `wrangler.jsonc`
+- [ ] `PARENT_SECRET` for production and dev
+- [ ] Cloudflare API token (Edit Cloudflare Workers template) and Account ID
+- [ ] GitHub environments `dev` and `production` (required reviewer), with both secrets
+- [ ] Commit and push to `main`, approve the production deploy
+- [ ] Create the first teacher with `--remote` (and `--remote --env dev`)
+
+---
+
 ## 2026-10-16 — README
 
 ### Changed
