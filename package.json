@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.app.json",
     "types": "wrangler types",
-    "teacher": "node scripts/teacher.mjs"
+    "teacher": "node scripts/teacher.mjs",
+    "smoke": "node scripts/smoke.mjs"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.64.0",

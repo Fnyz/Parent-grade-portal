@@ -5,6 +5,58 @@ The plan itself is in [PLAN.md](PLAN.md).
 
 ---
 
+## 2026-10-20 — Production live, and a smoke test after every deploy
+
+### Done
+- Production approved and live: https://grades.reportcard-ph.workers.dev
+- `scripts/smoke.mjs` (`npm run smoke -- <url>`): read-only checks of a live site, 14 in all:
+  pages load, `no-store`, strict content policy, no framing, HTTPS enforced, teacher API refuses
+  signed-out visitors, parent report needs a code, a wrong code is refused, other sites are
+  refused, unknown API paths 404. With `--expect-html` it first waits (up to a minute) until the
+  live page's scripts match the build, so it tests the new version.
+- `deploy.yml`: smoke test after the dev deploy (a failure stops the run before production is
+  offered) and after the production deploy. Each environment now links to its site in GitHub.
+- README and `docs/DEPLOYMENT.md` updated. The README now opens with a **Live sites** table:
+  clickable links to the parent page, teacher sign-in and privacy notice on production and dev
+  (all six checked: 200).
+
+### Verified
+- Live dev and live production: all 14 checks pass. Against example.com: 12 failures reported
+  clearly, exit code 1. `actionlint`: no problems.
+- The version check matches a clean build of the deployed commit (`parent-eTZKKEsb.js`). A build
+  from this Mac's `node_modules` gives a different file name: local packages have drifted from the
+  lockfile; `npm ci` fixes that. In the pipeline both come from the same fresh install.
+- The smoke test has not run inside GitHub yet; it runs on the next push to `main`.
+
+### Next
+- [ ] Commit `scripts/smoke.mjs`, `package.json`, `.github/workflows/deploy.yml`, `docs/`,
+  README and PROGRESS, push, and watch the smoke steps run
+- [ ] Create the teacher accounts with `--remote` (and `--remote --env dev`)
+- [ ] Calendar reminder: replace the API token before 2027-10-20
+
+---
+
+## 2026-10-20 — First deploy and the deployment guide
+
+### Done
+- Steps 6–7: account API token `github-deploy-grades` (Edit Cloudflare Workers template, expires
+  2027-10-20); GitHub environments `dev` and `production` (required reviewer Fnyz), both with
+  `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+- Pushed to `main` (commit `06e6ea1`). Deploy run #1: checks passed (65 tests, 1 skipped), dev
+  deployed in 19 s, production waiting for approval.
+- Dev checked live: pages load, security headers present, API answers, wrong code refused
+  (Durable Object and rate limiter work on Cloudflare).
+- Added `docs/DEPLOYMENT.md`: the whole setup from account to live, real non-secret values, day to
+  day tasks (ship, redeploy, roll back, renew token, reset password), and the problems we hit.
+  Linked from the README.
+
+### Next
+- [x] Approve the production deploy, then check https://grades.reportcard-ph.workers.dev
+- [ ] Create the teacher accounts with `--remote` (and `--remote --env dev`)
+- [ ] Calendar reminder: replace the API token before 2027-10-20
+
+---
+
 ## 2026-10-20 — Cloudflare account, address and Worker names
 
 ### Done

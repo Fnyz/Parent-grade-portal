@@ -1,6 +1,7 @@
 # CD: every push to main is checked, deployed to the dev Worker
-# (grades-dev, fake data), then waits for approval before it is
-# deployed to production (real grades).
+# (grades-dev, fake data) and smoke-tested there, then waits for approval
+# before it is deployed to production (real grades) and smoke-tested again.
+# A failed smoke test on dev stops the run, so production is never offered.
 #
 # One-time setup in GitHub (Settings > Environments), see README "Deploying":
 #   - environment "dev"
@@ -30,6 +31,7 @@ jobs:
     timeout-minutes: 15
     environment:
       name: dev
+      url: https://grades-dev.reportcard-ph.workers.dev
     concurrency:
       group: deploy-dev
       cancel-in-progress: false
@@ -57,6 +59,8 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Smoke test the live dev site
+        run: npm run smoke -- https://grades-dev.reportcard-ph.workers.dev --expect-html dist/client/index.html
 
   production:
     name: Deploy to production
@@ -66,6 +70,7 @@ jobs:
     # The "production" environment's required reviewer must approve before this runs.
     environment:
       name: production
+      url: https://grades.reportcard-ph.workers.dev
     concurrency:
       group: deploy-production
       cancel-in-progress: false
@@ -90,3 +95,5 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Smoke test the live production site
+        run: npm run smoke -- https://grades.reportcard-ph.workers.dev --expect-html dist/client/index.html

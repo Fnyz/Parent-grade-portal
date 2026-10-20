@@ -9,10 +9,20 @@ A small website where parents see their child's report cards, and advisers enter
   students by hand or from a spreadsheet, enter grades in a grid that saves on its own, and choose
   when each quarter becomes visible to parents.
 
-Everything runs on one free Cloudflare account, at `grades.reportcard-ph.workers.dev`
-(dev: `grades-dev.reportcard-ph.workers.dev`): a Worker for the pages and API, KV for classes and
+Everything runs on one free Cloudflare account: a Worker for the pages and API, KV for classes and
 grades, a Durable Object for sessions and access codes, and the Rate Limiting binding for wrong
 code guesses.
+
+## Live sites
+
+| | Production (real grades) | Dev (fake data, for testing) |
+| --- | --- | --- |
+| Parent page | https://grades.reportcard-ph.workers.dev | https://grades-dev.reportcard-ph.workers.dev |
+| Teacher sign-in | https://grades.reportcard-ph.workers.dev/teacher | https://grades-dev.reportcard-ph.workers.dev/teacher |
+| Privacy notice | https://grades.reportcard-ph.workers.dev/privacy | https://grades-dev.reportcard-ph.workers.dev/privacy |
+
+The parent page address is the one printed on access slips. How these were set up:
+[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 The plan, decisions and rules the build must follow are in [PLAN.md](PLAN.md). What has been done
 and what is left is in [PROGRESS.md](PROGRESS.md).
@@ -51,6 +61,7 @@ Safari may not keep the sign-in cookie on `http://localhost`.
 | `npm test` | API and unit tests, run inside the Workers runtime |
 | `npm run typecheck` | Type checks the Worker and the pages |
 | `npm run teacher -- …` | Teacher accounts (below) |
+| `npm run smoke -- <url>` | Checks a deployed site (read-only); the pipeline runs it after each deploy |
 
 Before pushing, `npm run typecheck && npm test && npm run build` runs the same checks as CI.
 
@@ -111,12 +122,15 @@ These come from PLAN.md, "Rules that must hold", and the tests check most of the
 
 ## Deploying
 
+The full step-by-step record of how this was set up, with the real names and IDs, rollbacks,
+token renewal and the problems we hit, is in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+
 Deploys run from GitHub Actions:
 
 - **CI** (`.github/workflows/ci.yml`): every pull request and every push to a branch other than
   `main` runs the type checks, tests and build. No secrets, deploys nothing.
 - **Deploy** (`.github/workflows/deploy.yml`): every push to `main` runs the same checks, deploys
-  to the **dev** Worker (`grades-dev`, fake data), then waits for your approval in
+  to the **dev** Worker (`grades-dev`, fake data), smoke-tests it, then waits for your approval in
   GitHub before deploying to **production** (real grades). You can also start it by hand from the
   Actions tab.
 
