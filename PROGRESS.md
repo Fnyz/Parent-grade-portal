@@ -5,6 +5,24 @@ The plan itself is in [PLAN.md](PLAN.md).
 
 ---
 
+## 2026-10-20 — Fix: teacher script failed on Cloudflare for a new email
+
+### Changed
+- `scripts/teacher.mjs`, `kvGet`: before creating an account the script checks whether the email
+  is taken. Locally a missing key reads as "Value not found", but on Cloudflare (`--remote`)
+  Wrangler exits with `404: Not Found`, which the script treated as a failure. A 404 now means
+  "not found", so `create` works for new emails on the live sites. Other errors still stop it.
+- The earlier `401: Unauthorized` on the same command was an expired Wrangler login;
+  `npx wrangler whoami` (or `npx wrangler login`) refreshes it.
+
+### Verified
+- On Cloudflare (production), read-only: a missing key is recognised; `reset-password` for an
+  unknown email now says "No teacher with … in Cloudflare (production)" instead of crashing.
+  Local data unchanged.
+- Not yet run: `create --remote` itself (needs the password typed by you).
+
+---
+
 ## 2026-10-20 — Ignore the Serena cache (first change through a pull request)
 
 ### Changed
