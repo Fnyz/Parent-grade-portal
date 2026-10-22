@@ -24,6 +24,33 @@ code guesses.
 The parent page address is the one printed on access slips. How these were set up:
 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
+## Screenshots
+
+Sample data only: made-up students, taken from local test data.
+
+**Parent page** (on a phone): type the code from the slip, see the quarters and averages, open a
+full report card.
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/parent-code.png" width="230" alt="Parent code screen"><br><sub>Enter the access code</sub></td>
+    <td align="center"><img src="docs/screenshots/parent-overview.png" width="230" alt="Parent overview with general average and quarters"><br><sub>Quarters and general average</sub></td>
+    <td align="center"><img src="docs/screenshots/parent-report-card.png" width="230" alt="Quarter report card by subject"><br><sub>One quarter's report card</sub></td>
+  </tr>
+</table>
+
+**Teacher dashboard** (on a computer): class summary, colour-coded grade grid (red is below
+passing, amber is missing), and the Visible to parents switch for each quarter.
+
+<img src="docs/screenshots/teacher-dashboard.png" width="860" alt="Teacher dashboard with summary tiles and grade grid">
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/teacher-phone.png" width="230" alt="Teacher dashboard on a phone"><br><sub>Teacher dashboard on a phone</sub></td>
+    <td align="center"><img src="docs/screenshots/parent-overview-dark.png" width="230" alt="Parent page in dark mode"><br><sub>Dark mode (Light, Dark or Auto)</sub></td>
+  </tr>
+</table>
+
 The plan, decisions and rules the build must follow are in [PLAN.md](PLAN.md). What has been done
 and what is left is in [PROGRESS.md](PROGRESS.md).
 
