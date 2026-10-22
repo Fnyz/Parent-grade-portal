@@ -50,8 +50,17 @@ function wrangler(args) {
   });
 }
 
+// A missing key reads as "Value not found" locally, but on Cloudflare Wrangler
+// exits with a 404 error instead. Both mean the key does not exist.
 function kvGet(k) {
-  const out = wrangler(["kv", "key", "get", k, "--text"]).trim();
+  let out;
+  try {
+    out = wrangler(["kv", "key", "get", k, "--text"]).trim();
+  } catch (e) {
+    const msg = `${e.stdout ?? ""}${e.stderr ?? ""}`;
+    if (/404: Not Found|key not found|Value not found/i.test(msg)) return null;
+    throw e;
+  }
   return out === "" || out === "Value not found" ? null : out;
 }
 

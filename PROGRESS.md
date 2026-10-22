@@ -5,6 +5,62 @@ The plan itself is in [PLAN.md](PLAN.md).
 
 ---
 
+## 2026-10-22 — Decision: no automatic sending of codes (Messenger or SMS)
+
+Considered sending each family its access code automatically, by Messenger or by SMS.
+**Decided not to.**
+
+- A wrong or outdated phone number, or a mismatched Messenger account, sends a child's grades to
+  a stranger, and that cannot be undone (PLAN.md: the most serious risk).
+- It would make the school store parents' contact numbers, which needs consent, a retention rule
+  and the school head's approval under the Data Privacy Act. The portal stores no contact details
+  by design.
+- Messenger cannot message parents who have not first messaged a Facebook Page. SMS costs money
+  and needs a registered sender name.
+- Notifications are already in PLAN.md's "Not in version one" list.
+
+Codes stay on paper slips handed out in person and checked against the class list. Posting the
+general link (not the codes) in the class group chat is fine. If ever needed, the low-risk option
+is a "Copy message" button the teacher pastes into a private chat, with the school head's approval.
+
+---
+
+## 2026-10-22 — Screenshots in the README
+
+### Changed
+- `docs/screenshots/`: six PNGs (about 1 MB in total): parent code screen, parent overview,
+  report card, parent overview in dark mode, teacher dashboard on a computer, teacher dashboard on
+  a phone.
+- README: a **Screenshots** section after "Live sites", phone screens side by side.
+
+### How they were made
+- From **local** test data only, with a screenshot-only teacher (`screens@example.test`, local
+  password, sample class "Grade 4 - Sampaguita" at "Sample Elementary School", six made-up
+  students). Nothing from production. No screen shows an access code.
+- Taken with headless Chrome at phone (390 px, 2×) and computer (1280 px, 1.5×) sizes.
+- To retake them after a design change: run `npm run dev`, sign in as that local teacher, and
+  capture the same screens. The local teacher stays in `.wrangler/state` until that is deleted.
+
+---
+
+## 2026-10-20 — Fix: teacher script failed on Cloudflare for a new email
+
+### Changed
+- `scripts/teacher.mjs`, `kvGet`: before creating an account the script checks whether the email
+  is taken. Locally a missing key reads as "Value not found", but on Cloudflare (`--remote`)
+  Wrangler exits with `404: Not Found`, which the script treated as a failure. A 404 now means
+  "not found", so `create` works for new emails on the live sites. Other errors still stop it.
+- The earlier `401: Unauthorized` on the same command was an expired Wrangler login;
+  `npx wrangler whoami` (or `npx wrangler login`) refreshes it.
+
+### Verified
+- On Cloudflare (production), read-only: a missing key is recognised; `reset-password` for an
+  unknown email now says "No teacher with … in Cloudflare (production)" instead of crashing.
+  Local data unchanged.
+- Not yet run: `create --remote` itself (needs the password typed by you).
+
+---
+
 ## 2026-10-20 — Ignore the Serena cache (first change through a pull request)
 
 ### Changed

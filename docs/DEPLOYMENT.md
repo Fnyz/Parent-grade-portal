@@ -294,3 +294,5 @@ Devices already signed in stay signed in until their session ends (12 hours at m
 | `gh` cannot list secrets (403) | The `gh` login is another account (FDC-Jez-NC-Web) | Check secrets in the browser as Fnyz; pushes use SSH and are fine |
 | Commit message was the whole `git commit -m ...` line | Command pasted into VS Code's commit box | Type only the message next time |
 | "ubuntu-latest will migrate to Ubuntu 26" notice | GitHub updating its runners | Nothing to do |
+| `401: Unauthorized` from `npm run teacher -- … --remote` | Wrangler login expired | `npx wrangler login` (or `whoami`), then retry |
+| `404: Not Found` from `npm run teacher -- create … --remote` | Script bug: a free email reads as a 404 on Cloudflare | Fixed in `scripts/teacher.mjs` (2026-10-20) |
